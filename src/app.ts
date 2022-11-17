@@ -1,18 +1,35 @@
-import express from 'express';
-import Connection from './database/connection';
+import express, { json } from 'express';
+import { CategoriesController } from './controllers/categories.controller';
+import { conn } from './database/connection';
+import { Category } from './models/category';
+
 class APP{
     public express: express.Application;
-    private connection: Connection | undefined;
+    
+    categoriesController: CategoriesController;
 
     constructor(){
         this.express = express();
+        this.middlewares();
+        this.controllers();
         this.db();
+        this.routes();
+    }
+
+    middlewares(){
+        this.express.use(json());
+    }
+
+    routes(){
+        this.express.use('/api', this.categoriesController.router);
     }
 
     db(){
-        this.connection = new Connection();
-        this.connection.connection.sync()
+        //Category.sync({force: false});
+
+        conn.sync()
         .then(() => {
+            Category.sync();
             console.log(`Database is connected`)
         })
         .catch((error) => {
@@ -24,6 +41,10 @@ class APP{
         this.express.listen(port, 
             () => console.log(`Server run in port http://localhost:${port}`)
         );
+    }
+
+    controllers(){
+        this.categoriesController = new CategoriesController();
     }
 }
 
