@@ -21,14 +21,18 @@ export class CategoriesController {
     }
 
     async getList(req: Request, res: Response) : Promise<Response> {
-        const categories = await categoriesService.getList();
-        return res.json(categories);
+        const responseDto = await categoriesService.getList();
+
+        return res.status(responseDto.code).json(responseDto);
     }
 
     async getOne(req: Request, res: Response) : Promise<Response> {
+
         const { id } = req.params;
-        const category = await categoriesService.getOne(+id);
-        return res.json(category);
+        const responseDto = await categoriesService.getOne(+id);
+
+        return res.status(responseDto.code).json({message: responseDto.message, data: responseDto.data});
+        
     }
 
     async create(req: Request, res: Response) : Promise<Response> {
@@ -38,13 +42,18 @@ export class CategoriesController {
         const errors = await validate(createCategoryDto);
 
         if(errors.length>0){
+
             console.log(errors);
+
             return res.status(400).json({
                 "Validation-errors": errors
             });
+
         }
 
-        return res.json(await categoriesService.create(createCategoryDto));
+        const respondeDto = await categoriesService.create(createCategoryDto);
+
+        return res.status(respondeDto.code).json(respondeDto);
     }
 
     async update(req: Request, res: Response) : Promise<Response> {
